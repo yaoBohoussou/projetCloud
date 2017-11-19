@@ -117,14 +117,14 @@ public class App
 				public String call(ConsumerRecord<String, String> record) throws Exception {
 					return record.value();
 				}
-			}).foreachRDD(new VoidFunction<JavaRDD<String>>(){
+			});/*.foreachRDD(new VoidFunction<JavaRDD<String>>(){
 				@Override
 				public void call(JavaRDD<String> rdd) throws Exception {
 					rdd.saveAsTextFile(fichierDestination);//Sauvegarde le RDD dans un fichier
 				}
-			});
+			});*/
 			//OU ENCORE
-			JavaPairDStream<LocalDateTime, Tuple3<Integer, String, Double>> lignes = messages.mapToPair(
+/*			JavaPairDStream<LocalDateTime, Tuple3<Integer, String, Double>> lignes = messages.mapToPair(
 					new PairFunction<ConsumerRecord<String, String>, LocalDateTime, Tuple3<Integer, String, Double>>() {
 						@Override
 						public Tuple2<LocalDateTime, Tuple3<Integer, String, Double>> call(ConsumerRecord<String, String> record) {
@@ -137,7 +137,7 @@ public class App
 							return new Tuple2<>(date, new Tuple3<>(idQuartier, nomQuartier, conso));
 						}
 					});
-/**/
+*/
 
 			JavaPairDStream<LocalDateTime, Tuple4<Integer,Boolean, String, Double>> lignes1 = messages.mapToPair(
                                         new PairFunction<ConsumerRecord<String, String>, LocalDateTime, Tuple4<Integer,Boolean, String, Double>>() {
