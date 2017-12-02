@@ -54,6 +54,15 @@ import scala.Tuple3;
 import scala.Tuple4;
 
 
+import org.apache.commons.io.IOUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+//import org.apache.hadoop.fs.Path;
+import java.net.URI;
+import java.util.logging.Logger;
+
 /**
  * Hello world!
  *
@@ -67,7 +76,12 @@ public class App
 	public static String TOPIC_EMISSION = "conso-quartiers";
 	public static String SEPARATEUR = ",";
 	public static String fichierDestination = "log.txt";
-	public static String fichierDestination2 = "log2";
+	public static String fichierDestination1 = "log2";
+	public static String fichierDestination2 = "hdfs://localhost:9000/user/root/log2";
+
+	/*public static String hdfsuri="hdfs://localhost:9000";
+        public static String hdfsPath ="projetCloud";
+	public static String fileName ="logProjetCloud";*/ 
 
 	public static int frequence = 1;
 
@@ -159,7 +173,8 @@ lignesds.foreachRDD(new VoidFunction<JavaRDD<String>>(){
                                 @Override
                                 public void call(JavaRDD<String> rdd) throws Exception {
                                         rdd.saveAsTextFile(fichierDestination2);//Sauvegarde le RDD dans un fichier
-                                }
+        				rdd.saveAsTextFile(fichierDestination1);
+	                        }
                         });
 
 
