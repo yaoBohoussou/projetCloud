@@ -1,0 +1,42 @@
+1/ lancer zookeper
+	-cd /usr/local/src/kafka_2.11-1.0.0/
+	-zookeeper-server-start.sh config/zookeeper.properties
+	
+
+2/lancer kafka
+	-cd /usr/local/src/kafka_2.11-1.0.0/
+	-kafka-server-start.sh config/server.properties
+
+3/lancer le simulateur
+	-cd /usr/local/src/simulateur/
+	-java -jar GenerateurDonnees-0.0.1-SNAPSHOT.jar
+	
+4/lancer hadoop 
+
+
+pour la configuration de hadoop j'ai utilisé ce lien : https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/SingleCluster.html#Prepare_to_Start_the_Hadoop_Cluster
+faites les parties suivantes :
+	Prepare to Start the Hadoop Cluster
+	Pseudo-Distributed Operation
+ 
+
+
+	-cd /usr/local/src/hadoop-2.7.4 (on part dans le répertoire racine de hadoop. Adaptez la commande précédente à votre cas particulier)
+	-sbin/stop-dfs.sh && sbin/stop-yarn.sh (Arrête toutes les instances de hadoop qui tournent sur la machine)
+	-rm -Rf /tmp/hadoop-root (efface les cache de hadoop si hadoop a déja tourné sur la machine.)
+	-bin/hdfs namenode -format
+	-sbin/start-dfs.sh && sbin/start-yarn.sh
+	-jps (pour s'assurer que le namenode, le datanode, le ressourcemanager sont tous lancés: si un manque ça risque de ne pas marcher)
+	
+	-bin/hdfs dfs -mkdir /user/ (crée le répertoire user dans hdfs)
+	-bin/hdfs dfs -mkdir /user/root (crée le répertoire root dans le répertoire user de hdfs)
+	
+5/compiler le code du consomateur (pensez à installer MAVEN sur votre machine virtuelle )
+        -se déplacer dans le code du projet consmateur (chez moi c'est :  cd /home/vm-cloud/consProjetCloud/)
+        -mvn clean compile assembly:single
+
+5/lancer le consomateur
+	-rester dans le répertoire du proje
+	-spark-submit --class com.projetCloud.consumerkafka.App target/consProjetCloud-1.0-SNAPSHOT-jar-with-dependencies.jar	
+
+après avoir démaré une simulation et laissé tourné le consomateur pendant un moment, sans arrêter le consomateur et dans un nouveau terminal, lancez bin/hdfs dfs -cat /user/root/log2/part-00000 normalement avec ça vous verrez ce qui a été écris dans hadoop
