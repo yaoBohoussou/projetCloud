@@ -53,6 +53,7 @@ import scala.Tuple2;
 import scala.Tuple3;
 import scala.Tuple4;
 
+import org.elasticsearch.spark.streaming.api.java.JavaEsSparkStreaming;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -62,7 +63,8 @@ import org.apache.hadoop.fs.FileSystem;
 //import org.apache.hadoop.fs.Path;
 import java.net.URI;
 import java.util.logging.Logger;
-
+import java.util.LinkedList;
+import java.util.Queue;
 /**
  * Hello world!
  *
@@ -75,7 +77,7 @@ public class App
 	public static String TOPIC_RECEPTION = "conso-maisons";
 	public static String TOPIC_EMISSION = "conso-quartiers";
 	public static String SEPARATEUR = ",";
-	public static String fichierDestination = "log.txt";
+	public static String fichierDestination = "log1";
 	public static String fichierDestination1 = "log2";
 	public static String fichierDestination2 = "hdfs://localhost:9000/user/root/log2";
 
@@ -137,23 +139,9 @@ public class App
 					rdd.saveAsTextFile(fichierDestination);//Sauvegarde le RDD dans un fichier
 				}
 			});*/
-			//OU ENCORE
-/*			JavaPairDStream<LocalDateTime, Tuple3<Integer, String, Double>> lignes = messages.mapToPair(
-					new PairFunction<ConsumerRecord<String, String>, LocalDateTime, Tuple3<Integer, String, Double>>() {
-						@Override
-						public Tuple2<LocalDateTime, Tuple3<Integer, String, Double>> call(ConsumerRecord<String, String> record) {
-							String[] donnees = record.value().split(SEPARATEUR);
-							LocalDateTime date = LocalDateTime.parse(donnees[0]);
-							Integer idQuartier = Integer.parseInt(donnees[1]);
-							String nomQuartier = donnees[2];
-							//POSSIBILITE DE FAIRE UN PRINT ICI
-							double conso = Double.parseDouble(donnees[4]);
-							return new Tuple2<>(date, new Tuple3<>(idQuartier, nomQuartier, conso));
-						}
-					});
-*/
+			
 
-			JavaPairDStream<LocalDateTime, Tuple4<Integer,Boolean, String, Double>> lignes1 = messages.mapToPair(
+		/*	JavaPairDStream<LocalDateTime, Tuple4<Integer,Boolean, String, Double>> lignes1 = messages.mapToPair(
                                         new PairFunction<ConsumerRecord<String, String>, LocalDateTime, Tuple4<Integer,Boolean, String, Double>>() {
                                                 @Override
                                                 public Tuple2<LocalDateTime, Tuple4<Integer,Boolean, String, Double>> call(ConsumerRecord<String, String> record) {
@@ -167,17 +155,53 @@ public class App
                                                         return new Tuple2<>(date, new Tuple4<>(idQuartier,vip,nomQuartier, conso));
                                                 }
                                         });
-			JavaDStream lignesds = lignes1.toJavaDStream();
+		*/
 
-lignesds.foreachRDD(new VoidFunction<JavaRDD<String>>(){
+			JavaDStream<String> ligneString = messages.map(
+				new Function<ConsumerRecord<String,String>, String>()
+				{
+					@Override
+					public String call (ConsumerRecord<String, String> record)
+					{
+						String[] donnees = record.value().split(SEPARATEUR);
+                                                        LocalDateTime date = LocalDateTime.parse(donnees[0]);
+                                                        Integer idQuartier = Integer.parseInt(donnees[1]);
+                                                        String nomQuartier = donnees[2];
+                                                        Boolean vip = new Boolean(false);
+                                                        double conso = Double.parseDouble(donnees[4]);
+							String toReturn = "{\"date\":\""+date+"\",\"idQuartier\":"+ idQuartier+",\"nomQuartier\":\""+nomQuartier+"\",\"vip\":"+vip+",\"conso\":"+conso+"}";
+							return 	toReturn;
+					}
+
+
+				}
+			);
+
+
+
+
+		/*	JavaDStream lignesds = lignes1.toJavaDStream();
+			lignesds.foreachRDD(new VoidFunction<JavaRDD<String>>(){
                                 @Override
                                 public void call(JavaRDD<String> rdd) throws Exception {
                                         rdd.saveAsTextFile(fichierDestination2);//Sauvegarde le RDD dans un fichier
-        				rdd.saveAsTextFile(fichierDestination1);
-	                        }
+        				rdd.saveAsTextFile(fichierDestination1);		
+
+				 }
                         });
 
+		*/
 
+			ligneString.foreachRDD(new VoidFunction<JavaRDD<String>>(){
+                                @Override
+                                public void call(JavaRDD<String> rdd) throws Exception {
+                                        rdd.saveAsTextFile(fichierDestination);//Sauvegarde le RDD dans un fichier
+                                	rdd.saveAsTextFile(fichierDestination2); 
+					//JavaEsSparkStreaming.saveJsonToEs(rdd, "spark/projetCloud2");
+				}
+                        });
+			//JavaEsSparkStreaming.saveToEs(ligneString, "spark/projetCloud");
+//			JavaEsSparkStreaming.saveJsonToEs(ligneString, "spark/projetCloud2");
 
 
 
