@@ -152,6 +152,8 @@ public class App
                                                         Integer idQuartier = Integer.parseInt(donnees[1]);
                                                         String nomQuartier = donnees[2];
                                                         Boolean vip = new Boolean(false);
+							Boolean vipt = new Boolean(true);
+							if(idQuartier == 14){vip = vipt;}
                                                         double conso = Double.parseDouble(donnees[4]);
 							String toReturn = "{\"date\":\""+donnees[0]+"\",\"idQuartier\":"+ idQuartier+",\"nomQuartier\":\""+nomQuartier+"\",\"vip\":"+vip+",\"conso\":"+conso+"}";
 							return 	toReturn;
