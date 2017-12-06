@@ -45,7 +45,6 @@ import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaInputDStream;
 import org.apache.spark.streaming.api.java.JavaPairDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
-//import org.apache.spark.streaming.api.java.JavaDStreamTuple2;
 import org.apache.spark.streaming.kafka010.ConsumerStrategies;
 import org.apache.spark.streaming.kafka010.KafkaUtils;
 import org.apache.spark.streaming.kafka010.LocationStrategies;
@@ -60,16 +59,11 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
-//import org.apache.hadoop.fs.Path;
 import java.net.URI;
 import java.util.logging.Logger;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.time.format.DateTimeFormatter;
-/**
- * Hello world!
- *
- */
 public class App 
 {
 
@@ -80,8 +74,6 @@ public class App
 	public static String TOPIC_EMISSION = "conso-quartiers";
 	public static String SEPARATEUR = ",";
 	public static String fichierDestination = "log1";
-	public static String fichierDestination1 = "log2";
-	public static String fichierDestination2 = "hdfs://localhost:9000/user/root/log2";
 
 	public static int frequence = 1;
 
@@ -98,7 +90,6 @@ public class App
                         sparkConf.set("es.port", "9200");
 			JavaStreamingContext jssc = new JavaStreamingContext(sparkConf, Durations.seconds(frequence));
 
-
 			Properties kafkaProducerProps = new Properties();
 			kafkaProducerProps.put("bootstrap.servers", brokers);
 			kafkaProducerProps.put("acks", "all");
@@ -108,7 +99,6 @@ public class App
 			kafkaProducerProps.put("buffer.memory", 33554432);
 			kafkaProducerProps.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 			kafkaProducerProps.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-
 
 			Map<String, Object> kafkaParams = new HashMap<>();
 			kafkaParams.put("bootstrap.servers", brokers);
@@ -133,13 +123,7 @@ public class App
 				public String call(ConsumerRecord<String, String> record) throws Exception {
 					return record.value();
 				}
-			});/*.foreachRDD(new VoidFunction<JavaRDD<String>>(){
-				@Override
-				public void call(JavaRDD<String> rdd) throws Exception {
-					rdd.saveAsTextFile(fichierDestination);//Sauvegarde le RDD dans un fichier
-				}
-			});*/
-			
+			});
 
 		/*	JavaPairDStream<LocalDateTime, Tuple4<Integer,Boolean, String, Double>> lignes1 = messages.mapToPair(
                                         new PairFunction<ConsumerRecord<String, String>, LocalDateTime, Tuple4<Integer,Boolean, String, Double>>() {
@@ -165,9 +149,6 @@ public class App
 					{
 						String[] donnees = record.value().split(SEPARATEUR);
                                                         LocalDateTime date = LocalDateTime.parse(donnees[0]);
-							/*DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
-							String dateString = date.format(formater);*/
-							//String dateString = date.format(DateTimeFormatter.ISO_INSTANT);
                                                         Integer idQuartier = Integer.parseInt(donnees[1]);
                                                         String nomQuartier = donnees[2];
                                                         Boolean vip = new Boolean(false);
