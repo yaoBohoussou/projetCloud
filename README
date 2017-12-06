@@ -22,9 +22,9 @@
         -se déplacer dans le répertoire contenant Kibana (cd /home/vm-cloud/kibana-6.0.0-linux-x86_64)
 	-bin/kibana
 
-6/ Lancer le consomateur
+7/ Lancer le consomateur
 	-rester dans le répertoire du projet
 	-spark-submit --class com.projetCloud.consumerkafka.App target/consProjetCloud-1.0-SNAPSHOT-jar-with-dependencies.jar
 
-7/ Ouvrir Kibana dans un navigateur
+8/ Ouvrir Kibana dans un navigateur
         -aller sur localhost:5601
