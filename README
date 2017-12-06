@@ -28,3 +28,30 @@
 
 8/ Ouvrir Kibana dans un navigateur
         -aller sur localhost:5601
+
+
+Configurations à faire pour exécuter les logiciels
+1/ Zookeeper et kafka sont lancés sur la même VM
+
+2/modifier le fichier conf.txt du simulateur :
+	remplacer la ligne kafka-brokers localhost:9092,localhost:9093
+	par 		   kafka-brokers IP_VM_KAFKA:9092,IP_VM_KAFKA:9093
+
+3/modifier dans le consomateur :
+	remplacer la ligne public static String kafkaBrokers = "192.168.122.159:9092";
+	par                public static String kafkaBrokers = "IP_VM_KAFKA:9092"; 
+
+
+	remplacer la ligne sparkConf.set("es.nodes", "192.168.122.180");
+	par 	  	   sparkConf.set("es.nodes", "IP_VM_ELASTICSEARC");
+
+
+#ES_HOME = Répertoire home de Elasticsearch 
+4/Elasticsearch et Kibanna tournent sur la même VM
+	modifier dans ES_HOME/config/elasticsearch.yml   
+		donner la valeur _site_ au paramètre network.host (network.host: _site_)
+
+	modifier dans KIBANA_HOME/config/kibana.yml
+		modifier le paramètre elasticsearch.url : elasticsearch.url: "http://IP_VM_ELASTICSEARCH:9200"
+
+
