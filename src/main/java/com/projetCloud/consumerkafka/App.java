@@ -65,6 +65,7 @@ import java.net.URI;
 import java.util.logging.Logger;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.time.format.DateTimeFormatter;
 /**
  * Hello world!
  *
@@ -72,7 +73,8 @@ import java.util.Queue;
 public class App 
 {
 
-    public static String kafkaBrokers = "localhost:9092";
+    //public static String kafkaBrokers = "localhost:9092";
+	public static String kafkaBrokers = "192.168.122.159:9092";
 	public static long frequenceReception = 60000;
 	public static String TOPIC_RECEPTION = "conso-maisons";
 	public static String TOPIC_EMISSION = "conso-quartiers";
@@ -80,10 +82,6 @@ public class App
 	public static String fichierDestination = "log1";
 	public static String fichierDestination1 = "log2";
 	public static String fichierDestination2 = "hdfs://localhost:9000/user/root/log2";
-
-	/*public static String hdfsuri="hdfs://localhost:9000";
-        public static String hdfsPath ="projetCloud";
-	public static String fileName ="logProjetCloud";*/ 
 
 	public static int frequence = 1;
 
@@ -96,6 +94,8 @@ public class App
 
 			// Create context with a 2 seconds batch interval
 			SparkConf sparkConf = new SparkConf().setAppName(nomApplication);
+			sparkConf.set("es.nodes", "192.168.122.180");
+                        sparkConf.set("es.port", "9200");
 			JavaStreamingContext jssc = new JavaStreamingContext(sparkConf, Durations.seconds(frequence));
 
 
@@ -165,11 +165,14 @@ public class App
 					{
 						String[] donnees = record.value().split(SEPARATEUR);
                                                         LocalDateTime date = LocalDateTime.parse(donnees[0]);
+							/*DateTimeFormatter formater = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
+							String dateString = date.format(formater);*/
+							//String dateString = date.format(DateTimeFormatter.ISO_INSTANT);
                                                         Integer idQuartier = Integer.parseInt(donnees[1]);
                                                         String nomQuartier = donnees[2];
                                                         Boolean vip = new Boolean(false);
                                                         double conso = Double.parseDouble(donnees[4]);
-							String toReturn = "{\"date\":\""+date+"\",\"idQuartier\":"+ idQuartier+",\"nomQuartier\":\""+nomQuartier+"\",\"vip\":"+vip+",\"conso\":"+conso+"}";
+							String toReturn = "{\"date\":\""+donnees[0]+"\",\"idQuartier\":"+ idQuartier+",\"nomQuartier\":\""+nomQuartier+"\",\"vip\":"+vip+",\"conso\":"+conso+"}";
 							return 	toReturn;
 					}
 
@@ -180,28 +183,14 @@ public class App
 
 
 
-		/*	JavaDStream lignesds = lignes1.toJavaDStream();
-			lignesds.foreachRDD(new VoidFunction<JavaRDD<String>>(){
-                                @Override
-                                public void call(JavaRDD<String> rdd) throws Exception {
-                                        rdd.saveAsTextFile(fichierDestination2);//Sauvegarde le RDD dans un fichier
-        				rdd.saveAsTextFile(fichierDestination1);		
-
-				 }
-                        });
-
-		*/
-
+	
 			ligneString.foreachRDD(new VoidFunction<JavaRDD<String>>(){
                                 @Override
                                 public void call(JavaRDD<String> rdd) throws Exception {
                                         rdd.saveAsTextFile(fichierDestination);//Sauvegarde le RDD dans un fichier
-                                	rdd.saveAsTextFile(fichierDestination2); 
-					//JavaEsSparkStreaming.saveJsonToEs(rdd, "spark/projetCloud2");
 				}
                         });
-			//JavaEsSparkStreaming.saveToEs(ligneString, "spark/projetCloud");
-//			JavaEsSparkStreaming.saveJsonToEs(ligneString, "spark/projetCloud2");
+			JavaEsSparkStreaming.saveJsonToEs(ligneString, "spark/projetCloudJSON");
 
 
 
